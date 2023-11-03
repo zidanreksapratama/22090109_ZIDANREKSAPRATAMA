@@ -3,41 +3,72 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package javaapplication1;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import javaapplication1.Koneksi;
 import java.util.Date;
 import java.sql.Timestamp;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static javax.swing.DropMode.INSERT;
-import javax.imageio.ImageIO;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.Reader;
-import com.google.zxing.Result;
+import javax.swing.JOptionPane;
+import javax.swing.ButtonGroup;
 
-import com.google.zxing.common.HybridBinarizer;
 /**
  *
  * @author LENOVO
  */
 public class TambahKaryawan extends javax.swing.JFrame {
-     Connection con = null;
-     
+    private Data DataGUI;
+    private ButtonGroup jenisKelaminGroup;
+    
+
+    public String getNama() {
+        return Nama.getText();
+    }
+
+    public String getPosisi() {
+        return Posisi.getText();
+    }
+
+    public String getNomorHp() {
+        return NomorHp.getText();
+    }
+    
+    public String getAlamat() {
+        return Alamat.getText();
+    }
+
+
+    public String getJenisKelamin() {
+        if (Laki.isSelected()) {
+            return "Laki-Laki";
+        } else if (Perempuan.isSelected()) {
+            return "Perempuan";
+        } else {
+            return null;
+        }
+    }
      
     /**
      * Creates new form TambahKaryawan
+     * @param DataGUI
+     * @param idKaryawan
+     * @param nama
+     * @param alamat
+     * @param posisi
+     * @param jenisKelamin
+     * @param nomorHp
      */
-    public TambahKaryawan() {
+    public TambahKaryawan(Data DataGUI,String idKaryawan, String nama,String alamat, String posisi, String jenisKelamin, String nomorHp) {
         initComponents();
-        
+        this.DataGUI = DataGUI;
+        setLocationRelativeTo(this);
+         Nama.setText(nama);
+         Posisi.setText(posisi);
+         NomorHp.setText(nomorHp);
+        jenisKelaminGroup = new ButtonGroup();
+        jenisKelaminGroup.add(Laki);
+        jenisKelaminGroup.add(Perempuan);
+         
+         
     } 
     
     /**
@@ -53,31 +84,57 @@ public class TambahKaryawan extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        NomorHp = new javax.swing.JTextField();
         Nama = new javax.swing.JTextField();
         Posisi = new javax.swing.JTextField();
-        NomorHp = new javax.swing.JTextField();
+        Alamat = new javax.swing.JTextField();
         button1 = new java.awt.Button();
         button2 = new java.awt.Button();
         jLabel5 = new javax.swing.JLabel();
         Laki = new javax.swing.JRadioButton();
         Perempuan = new javax.swing.JRadioButton();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("TAMBAH DATA KARYAWAN");
+        jLabel1.setText("UPDATE DATA KARYAWAN");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, 396, 53));
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("NAMA");
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 70, 50, -1));
 
-        jLabel3.setText("POSISI");
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("ALAMAT");
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 100, 60, -1));
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("NOMOR HP");
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 160, 80, -1));
+        getContentPane().add(NomorHp, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 160, 150, -1));
+        getContentPane().add(Nama, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 70, 150, -1));
 
         Posisi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 PosisiActionPerformed(evt);
             }
         });
+        getContentPane().add(Posisi, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 130, 150, -1));
+
+        Alamat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AlamatActionPerformed(evt);
+            }
+        });
+        getContentPane().add(Alamat, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 100, 150, -1));
 
         button1.setBackground(new java.awt.Color(255, 51, 51));
         button1.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
@@ -87,6 +144,7 @@ public class TambahKaryawan extends javax.swing.JFrame {
                 button1ActionPerformed(evt);
             }
         });
+        getContentPane().add(button1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 150, -1));
 
         button2.setBackground(new java.awt.Color(102, 255, 102));
         button2.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
@@ -101,82 +159,40 @@ public class TambahKaryawan extends javax.swing.JFrame {
                 button2ActionPerformed(evt);
             }
         });
+        getContentPane().add(button2, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 260, 150, -1));
 
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("JENIS KELAMIN");
+        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 200, 110, -1));
 
+        Laki.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        Laki.setForeground(new java.awt.Color(255, 255, 255));
         Laki.setText("Laki-laki");
         Laki.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 LakiActionPerformed(evt);
             }
         });
+        getContentPane().add(Laki, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 200, 98, -1));
 
+        Perempuan.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        Perempuan.setForeground(new java.awt.Color(255, 255, 255));
         Perempuan.setText("Perempuan");
         Perempuan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 PerempuanActionPerformed(evt);
             }
         });
+        getContentPane().add(Perempuan, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 200, 98, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(button1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(button2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(52, 52, 52))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(Nama, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(Posisi, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(NomorHp, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(Laki, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(Perempuan, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(Nama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(Posisi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(22, 22, 22)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(NomorHp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(Laki)
-                    .addComponent(Perempuan))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(button2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(button1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(31, 31, 31))
-        );
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel7.setText("POSISI");
+        getContentPane().add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 130, 60, -1));
+
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/1a8a1eae-5d2f-4756-b4b0-19b8389bb943.jpg"))); // NOI18N
+        getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(-50, 0, 450, 320));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -190,40 +206,49 @@ public class TambahKaryawan extends javax.swing.JFrame {
     }//GEN-LAST:event_button2ActionPerformed
 
     private void button1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_button1ActionPerformed
-        // TODO add your handling code here:
+       this.dispose(); // TODO add your handling code here:
     }//GEN-LAST:event_button1ActionPerformed
 
     private void button2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_button2MouseClicked
-       String jk = null;
-       if(Laki.isSelected()){
-           jk= "Laki-Laki";
-       }else if(Perempuan.isSelected()){
-           jk= "Perempuan";
-       } 
-        try {
-            String nama = Nama.getText(); // Menggunakan Nama.getText() untuk mendapatkan nilai dari JTextField Nama
-            String posisi = Posisi.getText(); // Menggunakan Posisi.getText() untuk mendapatkan nilai dari JTextField Posisi
-            String nomorHp = NomorHp.getText(); // Menggunakan NomorHp.getText() untuk mendapatkan nilai dari JTextField NomorHp
-            String hurufPertama = posisi.substring(0, 1).toUpperCase();
-            String hurufKetiga = posisi.length() >= 3 ? posisi.substring(2, 3).toUpperCase() : "";
-            String IDKaryawan = jk + hurufPertama + hurufKetiga;
+    String jk = null;
+    String idPrefix = "";
 
-            Date date = new Date();
-            Timestamp timestamp = new Timestamp(date.getTime());
-          
-            String sql = "INSERT INTO `tbcrew`(`ID Karyawan`, `Nama Karyawan`, `Posisi`, `Jenis Kelamin`, `Nomor HP`, `Tanggal absensi dan Waktu Absensi`, `Keterangan`) VALUES (?, ?, ?, ?, ?, ?, 'Tidak Hadir')";
-            Connection con = (Connection) Koneksi.getConnection();
-            PreparedStatement pat=con.prepareStatement(sql);
-            pat.setString(1, IDKaryawan);
-            pat.setString(2, nama);
-            pat.setString(3, posisi);
-            pat.setString(4, jk);
-            pat.setString(5, nomorHp);
-            pat.setTimestamp(6, timestamp);
-            pat.execute();
-        }catch(Exception e) {
-            e.printStackTrace();
-                    }
+    if (jenisKelaminGroup.getSelection() == Laki.getModel()) {
+        jk = "Laki-Laki";
+        idPrefix = "01";
+    } else if (jenisKelaminGroup.getSelection() == Perempuan.getModel()) {
+        jk = "Perempuan";
+        idPrefix = "02";
+    }
+
+
+    try {
+        String nama = Nama.getText();
+        String alamat = Alamat.getText();
+        String posisi = Posisi.getText();
+        String nomorHp = NomorHp.getText();
+        String hurufPertama = posisi.substring(0, 1).toUpperCase();
+        String hurufKetiga = posisi.length() >= 3 ? posisi.substring(2, 3).toUpperCase() : "";
+        String duaDigitTerakhir = nomorHp.length() >= 2 ? nomorHp.substring(nomorHp.length() - 2) : "";
+        String IDKaryawan = hurufPertama + hurufKetiga + idPrefix + duaDigitTerakhir;
+
+        String sql = "INSERT INTO `tbcrew`(`ID Karyawan`, `Nama Karyawan`, `Alamat`, `Posisi`, `Jenis Kelamin`, `Nomor HP`) VALUES (?, ?, ?, ?, ?, ?)";
+        Connection con = (Connection) Koneksi.getConnection();
+        PreparedStatement pat = con.prepareStatement(sql);
+        pat.setString(1, IDKaryawan);
+        pat.setString(2, nama);
+        pat.setString(3, alamat);
+        pat.setString(4, posisi);
+        pat.setString(5, jk);
+        pat.setString(6, nomorHp);
+        pat.execute();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    
+    // Menutup frame TambahKaryawan setelah menyimpan data
+    this.dispose();
     }//GEN-LAST:event_button2MouseClicked
 
     private void LakiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LakiActionPerformed
@@ -233,6 +258,10 @@ public class TambahKaryawan extends javax.swing.JFrame {
     private void PerempuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PerempuanActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_PerempuanActionPerformed
+
+    private void AlamatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AlamatActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_AlamatActionPerformed
 
     /**
      * @param args the command line arguments
@@ -264,12 +293,14 @@ public class TambahKaryawan extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new TambahKaryawan().setVisible(true);
+                
+               
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField Alamat;
     private javax.swing.JRadioButton Laki;
     private javax.swing.JTextField Nama;
     private javax.swing.JTextField NomorHp;
@@ -282,5 +313,7 @@ public class TambahKaryawan extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     // End of variables declaration//GEN-END:variables
 }

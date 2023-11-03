@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * @author LENOVO
  */
 public class Koneksi {
-    private static Connection koneksi;
+     private static Connection koneksi;
     
     public static Connection getConnection() throws SQLException {
         String db="jdbc:mysql://localhost:3306/dbcrew";
