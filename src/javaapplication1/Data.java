@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -19,58 +20,35 @@ import javax.swing.ButtonGroup;
  */
 public class Data extends javax.swing.JPanel {
     private Statement st;
-    private Connection Con;
     private ResultSet Rs;
     private String Sql="";
+    private Connection Con; 
+    private DefaultTableModel model;
     private ButtonGroup jenisKelaminGroup;
+    
     
 
     /**
      * Creates new form Data
-     * @param rowData
+     * @param 
      */
-    public void tambahkanDataKeTabel(Object[] rowData) {
-        DefaultTableModel model = (DefaultTableModel) Tabeldata.getModel();
-        model.addRow(rowData);
-    }
+    
     public Data() {
+     try {
+        Con = Koneksi.getConnection();
+        st = Con.createStatement();
+    } catch (SQLException ex) {
+        throw new RuntimeException("Error saat terhubung ke database: " + ex.getMessage(), ex);
+    }
         initComponents();
-        displayData();
+        Tampil();
+      
         
         jenisKelaminGroup = new ButtonGroup();
         jenisKelaminGroup.add(Laki);
         jenisKelaminGroup.add(Perempuan);
     }
-    private void displayData() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Con = DriverManager.getConnection("jdbc:mysql://localhost:3306/dbcrew", "root", "");
-            Tampil(Sql);  
-        } catch (Exception e) {
-            System.out.println("Koneksi Gagal" + e.getMessage());
-        }
-    }
-     private void updateData(String idKaryawan, String nama, String posisi, String jenisKelamin, String nomorHp) {
-        try {
-            String sql = "UPDATE tbcrew SET `Nama Karyawan`=?, `Posisi`=?, `Jenis Kelamin`=?, `Nomor HP`=? WHERE `ID Karyawan`=?";
-            Connection con = (Connection) Koneksi.getConnection();
-            PreparedStatement pat = con.prepareStatement(sql);
-            pat.setString(1, nama);
-            pat.setString(2, posisi);
-            pat.setString(3, jenisKelamin);
-            pat.setString(4, nomorHp);
-            pat.setString(5, idKaryawan);
-            pat.executeUpdate();
-            
-            // Update the table data
-            displayData();
-
-            JOptionPane.showMessageDialog(this, "Data berhasil diupdate.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    private void Tampil(String Sql) {
+    private void Tampil() {
         DefaultTableModel kolomkolom = new DefaultTableModel();
         kolomkolom.addColumn("ID Karyawan");
         kolomkolom.addColumn("Nama Karyawan");
@@ -78,21 +56,51 @@ public class Data extends javax.swing.JPanel {
         kolomkolom.addColumn("Posisi");
         kolomkolom.addColumn("Jenis Kelamin");
         kolomkolom.addColumn("Nomor HP");
+        
+        kolomkolom.getDataVector().removeAllElements();
+        kolomkolom.fireTableDataChanged();
+        kolomkolom.setRowCount(0);
 
         try {
             st = Con.createStatement();
             Rs = st.executeQuery("SELECT * FROM tbcrew");
             while (Rs.next()) {
-                kolomkolom.addRow(new Object[] {
+                 Object[] data = {
                     Rs.getString(1), Rs.getString(2), Rs.getString(3),
-                    Rs.getString(4), Rs.getString(5),Rs.getString(6)});
+                    Rs.getString(4), Rs.getString(5),Rs.getString(6)};
+                kolomkolom.addRow(data); 
+                Tabeldata.setModel(kolomkolom);
+                
             }
-            Tabeldata.setModel(kolomkolom);
+          
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Gagal Menampilkan \n" + e);
         }
     }
-    
+    private void Refresh(){
+        Nama.setText("");
+        Alamat.setText("");
+        Posisi.setSelectedIndex(0);
+        NomorHp.setText("");
+        jenisKelaminGroup.clearSelection();
+        
+        simpan.setText("Simpan");
+    }
+    private boolean checkIDExist(String idKaryawan) {
+    try {
+        Connection con = (Connection) Koneksi.getConnection();
+        String query = "SELECT * FROM tbcrew WHERE `ID Karyawan`=?";
+        PreparedStatement pat = con.prepareStatement(query);
+        pat.setString(1, idKaryawan);
+        ResultSet rs = pat.executeQuery();
+        return rs.next(); // Jika rs.next() mengembalikan true, berarti ID sudah ada
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+     
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -110,17 +118,16 @@ public class Data extends javax.swing.JPanel {
         jLabel7 = new javax.swing.JLabel();
         Perempuan = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
-        jButton4 = new javax.swing.JButton();
-        edlt = new javax.swing.JButton();
+        hapus = new javax.swing.JButton();
         Laki = new javax.swing.JRadioButton();
         jLabel6 = new javax.swing.JLabel();
         NomorHp = new java.awt.TextField();
         Alamat = new java.awt.TextField();
-        Posisi = new java.awt.TextField();
         Nama = new java.awt.TextField();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        simpan = new javax.swing.JButton();
+        batal = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
+        Posisi = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         Tabeldata = new javax.swing.JTable();
@@ -137,18 +144,14 @@ public class Data extends javax.swing.JPanel {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1527, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1527, Short.MAX_VALUE))
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 83, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addGap(9, 9, 9)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(9, 9, 9)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -156,12 +159,12 @@ public class Data extends javax.swing.JPanel {
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("POSISI");
-        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 60, 16));
+        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, 60, 16));
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
         jLabel7.setText("NOMOR HP");
-        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, 90, 16));
+        jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 90, 16));
 
         Perempuan.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         Perempuan.setForeground(new java.awt.Color(255, 255, 255));
@@ -178,24 +181,15 @@ public class Data extends javax.swing.JPanel {
         jLabel3.setText("JENIS KELAMIN");
         jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 110, 16));
 
-        jButton4.setText("Refresh");
-        jButton4.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        hapus.setBackground(new java.awt.Color(102, 255, 255));
+        hapus.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        hapus.setText("Hapus Data");
+        hapus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                hapusActionPerformed(evt);
             }
         });
-        jPanel3.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 75, -1));
-
-        edlt.setBackground(new java.awt.Color(102, 255, 255));
-        edlt.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        edlt.setText("Edit Data Karyawan");
-        edlt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                edltActionPerformed(evt);
-            }
-        });
-        jPanel3.add(edlt, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 290, 160, 30));
+        jPanel3.add(hapus, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 290, 160, 30));
 
         Laki.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         Laki.setForeground(new java.awt.Color(255, 255, 255));
@@ -211,7 +205,7 @@ public class Data extends javax.swing.JPanel {
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("ALAMAT");
         jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 80, 16));
-        jPanel3.add(NomorHp, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 180, 270, -1));
+        jPanel3.add(NomorHp, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 140, 270, -1));
 
         Alamat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -219,7 +213,6 @@ public class Data extends javax.swing.JPanel {
             }
         });
         jPanel3.add(Alamat, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 100, 270, -1));
-        jPanel3.add(Posisi, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 140, 270, -1));
 
         Nama.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -228,30 +221,38 @@ public class Data extends javax.swing.JPanel {
         });
         jPanel3.add(Nama, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 60, 270, -1));
 
-        jButton1.setBackground(new java.awt.Color(51, 255, 51));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton1.setText("Tambah Karyawan");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        simpan.setBackground(new java.awt.Color(51, 255, 51));
+        simpan.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        simpan.setText("Simpan");
+        simpan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                simpanActionPerformed(evt);
             }
         });
-        jPanel3.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 290, 150, 30));
+        jPanel3.add(simpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 290, 150, 30));
 
-        jButton2.setBackground(new java.awt.Color(255, 102, 102));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton2.setText("Hapus data");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        batal.setBackground(new java.awt.Color(255, 102, 102));
+        batal.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        batal.setText("Batal");
+        batal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                batalActionPerformed(evt);
             }
         });
-        jPanel3.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 290, 130, 30));
+        jPanel3.add(batal, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 290, 130, 30));
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("NAMA");
         jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 60, 16));
+
+        Posisi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "===========>Pilih Posisi<===========", "Leader", "Kashier", "Platting", "Kitchen" }));
+        Posisi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PosisiActionPerformed(evt);
+            }
+        });
+        jPanel3.add(Posisi, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 180, 270, -1));
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Resource/1a8a1eae-5d2f-4756-b4b0-19b8389bb943.jpg"))); // NOI18N
         jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 520, 380));
@@ -274,6 +275,11 @@ public class Data extends javax.swing.JPanel {
             }
         }
     );
+    Tabeldata.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            TabeldataMouseClicked(evt);
+        }
+    });
     jScrollPane1.setViewportView(Tabeldata);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -302,34 +308,31 @@ public class Data extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_PerempuanActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        Nama.setText("nama");
-        Alamat.setText("alamat");
-        Posisi.setText("posisi");
-        NomorHp.setText("nomorHp");
-        jenisKelaminGroup.clearSelection();
-    }//GEN-LAST:event_jButton4ActionPerformed
-
-    private void edltActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_edltActionPerformed
-        int selectedRow = Tabeldata.getSelectedRow();
-
+    private void hapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hapusActionPerformed
+      int selectedRow = Tabeldata.getSelectedRow();
         if (selectedRow != -1) {
-            // Mendapatkan nilai-nilai dari baris terpilih
             String idKaryawan = Tabeldata.getValueAt(selectedRow, 0).toString();
-            String nama = Tabeldata.getValueAt(selectedRow, 1).toString();
-            String alamat = Tabeldata.getValueAt(selectedRow, 2).toString();
-            String posisi = Tabeldata.getValueAt(selectedRow, 3).toString();
-            String jenisKelamin = Tabeldata.getValueAt(selectedRow, 4).toString();
-            String nomorHp = Tabeldata.getValueAt(selectedRow, 5).toString();
 
-           // Membuat instance dari kelas TambahKaryawan dan menampilkannya
-            TambahKaryawan tambahKaryawanFrame = new TambahKaryawan(this, idKaryawan, nama, alamat, posisi, jenisKelamin, nomorHp);
-            tambahKaryawanFrame.setVisible(true);
+            int confirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
 
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    String sql = "DELETE FROM tbcrew WHERE `ID Karyawan`=?";
+                    Connection con = (Connection) Koneksi.getConnection();
+                    PreparedStatement pat = con.prepareStatement(sql);
+                    pat.setString(1, idKaryawan);
+                    pat.executeUpdate();
+                    DefaultTableModel model = (DefaultTableModel) Tabeldata.getModel();
+                    model.removeRow(selectedRow);
+                    Refresh();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "Pilih baris yang ingin diedit terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Pilih baris yang ingin dihapus terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
         }
-    }//GEN-LAST:event_edltActionPerformed
+    }//GEN-LAST:event_hapusActionPerformed
 
     private void LakiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LakiActionPerformed
         // TODO add your handling code here:
@@ -343,7 +346,7 @@ public class Data extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_NamaActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void simpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simpanActionPerformed
         String jk = null;
         String idPrefix = "";
 
@@ -356,65 +359,81 @@ public class Data extends javax.swing.JPanel {
         }
 
         try {
-            String nama = Nama.getText(); // Menggunakan Nama.getText() untuk mendapatkan nilai dari JTextField Nama
-            String posisi = Posisi.getText(); // Menggunakan Posisi.getText() untuk mendapatkan nilai dari JTextField Posisi
+            String nama = Nama.getText();
+            String posisi = (String) Posisi.getSelectedItem();
             String nomorHp = NomorHp.getText();
-            String alamat = Alamat.getText();// Menggunakan NomorHp.getText() untuk mendapatkan nilai dari JTextField NomorHp
+            String alamat = Alamat.getText();
+
+            String hurufPertamaNama = nama.substring(0, 1).toUpperCase() + nama.substring(1);
+            String hurufPertamaAlamat = alamat.substring(0, 1).toUpperCase() + alamat.substring(1);
             String hurufPertama = posisi.substring(0, 1).toUpperCase();
             String hurufKetiga = posisi.length() >= 3 ? posisi.substring(2, 3).toUpperCase() : "";
             String duaDigitTerakhir = nomorHp.length() >= 2 ? nomorHp.substring(nomorHp.length() - 2) : "";
+
             String IDKaryawan = hurufPertama + hurufKetiga + idPrefix + duaDigitTerakhir;
-            Object[] rowData = {IDKaryawan, nama,alamat, posisi, jk,nomorHp};
-            tambahkanDataKeTabel(rowData);
 
-            String sql = "INSERT INTO `tbcrew`(`ID Karyawan`, `Nama Karyawan`,`Alamat`, `Posisi`, `Jenis Kelamin`, `Nomor HP`) VALUES (?, ?, ?, ?, ?, ?)";
-            Connection con = (Connection) Koneksi.getConnection();
-            PreparedStatement pat = con.prepareStatement(sql);
-            pat.setString(1, IDKaryawan);
-            pat.setString(2, nama);
-            pat.setString(3, alamat);
-            pat.setString(4, posisi);
-            pat.setString(5, jk);
-            pat.setString(6, nomorHp);
-            pat.execute();
+            // Cek apakah ID Karyawan sudah ada di tabel
+            boolean isIDExist = checkIDExist(IDKaryawan);
 
-            String idKaryawanToUpdate = (String) jButton1.getClientProperty("idKaryawan");
-            if (idKaryawanToUpdate != null) {
-                updateData(idKaryawanToUpdate, nama, posisi, jk, nomorHp);
-                jButton1.putClientProperty("idKaryawan", null); // Reset data yang akan diedit setelah pembaruan berhasil
+            if (isIDExist) {
+                String updateSql = "UPDATE tbcrew SET `Nama Karyawan`=?, `Alamat`=?, `Posisi`=?, `Jenis Kelamin`=?, `Nomor HP`=? WHERE `ID Karyawan`=?";
+                Connection con = (Connection) Koneksi.getConnection();
+                PreparedStatement updatePat = con.prepareStatement(updateSql);
+                updatePat.setString(1, hurufPertamaNama);
+                updatePat.setString(2, hurufPertamaAlamat);
+                updatePat.setString(3, posisi);
+                updatePat.setString(4, jk);
+                updatePat.setString(5, nomorHp);
+                updatePat.setString(6, IDKaryawan);
+                updatePat.executeUpdate();
+            } else {
+                String insertSql = "INSERT INTO tbcrew(`ID Karyawan`, `Nama Karyawan`,`Alamat`, `Posisi`, `Jenis Kelamin`, `Nomor HP`) VALUES (?, ?, ?, ?, ?, ?)";
+                Connection con = (Connection) Koneksi.getConnection();
+                PreparedStatement insertPat = con.prepareStatement(insertSql);
+                insertPat.setString(1, IDKaryawan);
+                insertPat.setString(2, hurufPertamaNama);
+                insertPat.setString(3, hurufPertamaAlamat);
+                insertPat.setString(4, posisi);
+                insertPat.setString(5, jk);
+                insertPat.setString(6, nomorHp);
+                insertPat.executeUpdate();
             }
+
+            DefaultTableModel model = (DefaultTableModel) Tabeldata.getModel();
+            model.setRowCount(0); // Hapus semua data dari tabel
+            Tampil(); // Tampilkan ulang data dari database
+            Refresh();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_simpanActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        int selectedRow = Tabeldata.getSelectedRow();
-        if (selectedRow != -1) {
-            String idKaryawan = Tabeldata.getValueAt(selectedRow, 0).toString();
+    private void batalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_batalActionPerformed
+     Refresh();   // TODO add your handling code here:
+    }//GEN-LAST:event_batalActionPerformed
 
-            int confirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+    private void PosisiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PosisiActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_PosisiActionPerformed
 
-            if (confirm == JOptionPane.YES_OPTION) {
-                try {
-                    String sql = "DELETE FROM tbcrew WHERE `ID Karyawan`=?";
-                    Connection con = (Connection) Koneksi.getConnection();
-                    PreparedStatement pat = con.prepareStatement(sql);
-                    pat.setString(1, idKaryawan);
-                    pat.executeUpdate();
-
-                    // Hapus baris yang terpilih dari tabel GUI
-                    DefaultTableModel model = (DefaultTableModel) Tabeldata.getModel();
-                    model.removeRow(selectedRow);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+    private void TabeldataMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TabeldataMouseClicked
+        Nama.setText(Tabeldata.getValueAt(Tabeldata.getSelectedRow(),1).toString());
+        Alamat.setText(Tabeldata.getValueAt(Tabeldata.getSelectedRow(),2).toString());
+        Posisi.setSelectedItem(Tabeldata.getValueAt(Tabeldata.getSelectedRow(),3).toString());
+        NomorHp.setText(Tabeldata.getValueAt(Tabeldata.getSelectedRow(),5).toString());
+        String jenisKelamin = Tabeldata.getValueAt(Tabeldata.getSelectedRow(), 4).toString();
+        if (jenisKelamin.equals("Laki-laki")) {
+            Laki.setSelected(true);
+        } else if (jenisKelamin.equals("Perempuan")) {
+            Perempuan.setSelected(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Pilih baris yang ingin dihapus terlebih dahulu.", "Peringatan", JOptionPane.WARNING_MESSAGE);
-        }    // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+            jenisKelaminGroup.clearSelection();
+        } 
+        
+        simpan.setText("Ubah");
+    }//GEN-LAST:event_TabeldataMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -423,12 +442,10 @@ public class Data extends javax.swing.JPanel {
     private java.awt.TextField Nama;
     private java.awt.TextField NomorHp;
     private javax.swing.JRadioButton Perempuan;
-    private java.awt.TextField Posisi;
+    private javax.swing.JComboBox<String> Posisi;
     private javax.swing.JTable Tabeldata;
-    private javax.swing.JButton edlt;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton batal;
+    private javax.swing.JButton hapus;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -439,5 +456,6 @@ public class Data extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton simpan;
     // End of variables declaration//GEN-END:variables
 }

@@ -11,16 +11,15 @@ import java.sql.SQLException;
  * @author LENOVO
  */
 public class Koneksi {
-     private static Connection koneksi;
-    
+    static Connection Con;
     public static Connection getConnection() throws SQLException {
         String db="jdbc:mysql://localhost:3306/dbcrew";
         String user = "root";
         String pass = "";
         
-        if(koneksi==null) {
-            koneksi = DriverManager.getConnection(db,user,pass);
+        if(Con==null) {
+            Con = DriverManager.getConnection(db,user,pass);
         }
-        return koneksi;
+        return Con;
     }
 }
