@@ -93,7 +93,7 @@ public class Data extends javax.swing.JPanel {
         PreparedStatement pat = con.prepareStatement(query);
         pat.setString(1, idKaryawan);
         ResultSet rs = pat.executeQuery();
-        return rs.next(); // Jika rs.next() mengembalikan true, berarti ID sudah ada
+        return rs.next(); 
     } catch (SQLException e) {
         e.printStackTrace();
         return false;
@@ -289,7 +289,7 @@ public class Data extends javax.swing.JPanel {
         .addGroup(layout.createSequentialGroup()
             .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1003, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 988, Short.MAX_VALUE))
         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
@@ -369,10 +369,8 @@ public class Data extends javax.swing.JPanel {
             String hurufPertama = posisi.substring(0, 1).toUpperCase();
             String hurufKetiga = posisi.length() >= 3 ? posisi.substring(2, 3).toUpperCase() : "";
             String duaDigitTerakhir = nomorHp.length() >= 2 ? nomorHp.substring(nomorHp.length() - 2) : "";
-
             String IDKaryawan = hurufPertama + hurufKetiga + idPrefix + duaDigitTerakhir;
-
-            // Cek apakah ID Karyawan sudah ada di tabel
+            
             boolean isIDExist = checkIDExist(IDKaryawan);
 
             if (isIDExist) {
@@ -400,8 +398,8 @@ public class Data extends javax.swing.JPanel {
             }
 
             DefaultTableModel model = (DefaultTableModel) Tabeldata.getModel();
-            model.setRowCount(0); // Hapus semua data dari tabel
-            Tampil(); // Tampilkan ulang data dari database
+            model.setRowCount(0); 
+            Tampil();
             Refresh();
         } catch (Exception e) {
             e.printStackTrace();

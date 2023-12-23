@@ -5,7 +5,6 @@
 package javaapplication1;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
@@ -29,8 +28,8 @@ public class Absen extends javax.swing.JPanel {
     }
     private void displayData() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Con = DriverManager.getConnection("jdbc:mysql://localhost:3306/dbcrew", "root", "");
+            Con = Koneksi.getConnection();
+            st = Con.createStatement();
             Tampil(Sql);  
         } catch (Exception e) {
             System.out.println("Koneksi Gagal" + e.getMessage());
@@ -48,11 +47,11 @@ public class Absen extends javax.swing.JPanel {
 
         try {
             st = Con.createStatement();
-            Rs = st.executeQuery("SELECT * FROM tbabsen");
+            Rs = st.executeQuery("SELECT * FROM tbabsen1");
             while (Rs.next()) {
                 kolomkolom.addRow(new Object[] {
-                    Rs.getString(1), Rs.getString(2), Rs.getString(3),
-                    Rs.getString(4), Rs.getString(5), Rs.getString(6)});
+                    Rs.getString(2), Rs.getString(3), Rs.getString(4),
+                    Rs.getString(5), Rs.getString(6), Rs.getString(7)});
             }
             Tabelabsen.setModel(kolomkolom);
         } catch (Exception e) {
@@ -73,6 +72,8 @@ public class Absen extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
+
+        setPreferredSize(new java.awt.Dimension(1520, 680));
 
         Tabelabsen.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -106,28 +107,50 @@ public class Absen extends javax.swing.JPanel {
             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
         );
 
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1378, Short.MAX_VALUE))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1513, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(65, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+        String scannedBarcode = jTextField1.getText(); // Mengambil nilai dari JTextField
+        updateKeterangan(scannedBarcode);
+        jTextField1.setText("");  // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1ActionPerformed
+    private void updateKeterangan(String scannedBarcode) {
+    try {
+        Con = Koneksi.getConnection();
+        st = Con.createStatement();
+        String updateSql = "UPDATE tbabsen1 SET Keterangan = 'Hadir' WHERE ID_Karyawan = '" + scannedBarcode + "'";
+        st.executeUpdate(updateSql);
+        Tampil(Sql); // Memperbarui tampilan tabel setelah pembaruan database
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Gagal melakukan pembaruan keterangan\n" + e);
+    }
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable Tabelabsen;
